@@ -3,7 +3,6 @@ import psutil
 import ping3
 import schedule
 import time
-import json
 from datetime import datetime
 from failover import handle_failover, get_failover_status
 
@@ -30,6 +29,21 @@ def get_network_stats():
         "bytes_recv": stats.bytes_recv,
     }
 
+def send_data(data):
+    """بيبعت البيانات للـ Server"""
+    try:
+        response = requests.post(
+            f"{SERVER_URL}/api/readings/add",
+            json=data,
+            timeout=5
+        )
+        if response.status_code == 200:
+            print(f"✅ Data Sent Successfully")
+        else:
+            print(f"❌ Error Sending Data: {response.status_code}")
+    except Exception as e:
+        print(f"❌ Server Connection Error: {e}")
+
 def collect_data():
     """بيجمع كل البيانات"""
     is_connected, latency = check_connection()
@@ -41,14 +55,18 @@ def collect_data():
     failover_status = get_failover_status()
     
     data = {
-        "timestamp": datetime.now().isoformat(),
         "is_connected": is_connected,
         "latency_ms": latency,
         "network_stats": get_network_stats(),
-        "failover": failover_status
+        "failover": failover_status,
+        "timestamp": datetime.now().isoformat()
     }
     
     print(f"[{data['timestamp']}] Connected: {is_connected} | Latency: {latency}ms | Backup: {failover_status['is_using_backup']}")
+    
+    # بعت البيانات للـ Server
+    send_data(data)
+    
     return data
 
 def run():
