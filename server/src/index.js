@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const readingsRouter = require('./routes/readings');
+const authRouter = require('./routes/auth');
+const subscriptionRouter = require('./routes/subscription');
 
 // تحميل الـ Settings
 dotenv.config();
@@ -15,6 +17,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/readings', readingsRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/subscription', subscriptionRouter);
 
 // Test Route
 app.get('/', (req, res) => {
